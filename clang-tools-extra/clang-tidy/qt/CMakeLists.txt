@@ -4,6 +4,7 @@ set(LLVM_LINK_COMPONENTS
   )
 
 add_clang_library(clangTidyQtModule
+  PortToStdCompatibleApiCheck.cpp
   QtTidyModule.cpp
 
   LINK_LIBS

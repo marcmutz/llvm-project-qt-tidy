@@ -181,6 +181,12 @@ New checks
   Future libc++ will remove the extension (`D120996
   <https://reviews.llvm.org/D120996>`).
 
+- New :doc:`qt-port-to-std-compatible-api
+  <clang-tidy/checks/qt/port-to-std-compatible-api>` check.
+
+  Detects use of non-std-compatible API on Qt smart pointer and container classes;
+  optionally ports to the std-compatible API subset.
+
 New check aliases
 ^^^^^^^^^^^^^^^^^
 

@@ -9,6 +9,7 @@
 #include "../ClangTidy.h"
 #include "../ClangTidyModule.h"
 #include "../ClangTidyModuleRegistry.h"
+#include "PortToStdCompatibleApiCheck.h"
 
 namespace clang {
 namespace tidy {
@@ -17,6 +18,8 @@ namespace qt {
 class QtModule : public ClangTidyModule {
 public:
   void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+    CheckFactories.registerCheck<PortToStdCompatibleApiCheck>(
+        "qt-port-to-std-compatible-api");
   }
 };
 
