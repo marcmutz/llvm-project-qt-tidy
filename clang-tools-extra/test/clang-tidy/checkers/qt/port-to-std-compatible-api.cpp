@@ -103,3 +103,45 @@ void dn1() {
   const QString cstr;
   const QChar* cptr = cstr.data();
 }
+
+
+template <typename T>
+class QList {
+public:
+  int count() const;  // old
+  int length() const; // also old
+  int size() const;   // new
+  int count(const T&); // shouldn't be touched
+};
+
+template <typename T, int N = 255>
+class QVarLengthArray {
+public:
+  int count() const;  // old
+  int length() const; // also old
+  int size() const;   // new
+  int count(const T&); // shouldn't be touched
+};
+
+template <typename T>
+class QHash {
+public:
+  int count() const;  // old
+  int length() const; // also old
+  int size() const;   // new
+  int count(const T&); // shouldn't be touched
+};
+
+void l1() {
+  QList<int> l;
+  auto c = l.count();
+  // CHECK-MESSAGES: :[[@LINE-1]]:12: warning: use 'size' instead of 'count' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  auto c = l.size();
+}
+
+void l2() {
+  QList<QChar> l;
+  auto c = l.length();
+  // CHECK-MESSAGES: :[[@LINE-1]]:12: warning: use 'size' instead of 'length' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  auto c = l.size();
+}

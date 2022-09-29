@@ -27,12 +27,15 @@ namespace qt {
 constexpr char QtTargetOptionKey[] = "QtTarget";
 constexpr char ScopeOptionKey[] = "Scope";
 constexpr char QtSmartPointerClassesOptionKey[] = "QtSmartPointerClasses";
+constexpr char QtContainerClassesOptionKey[] = "QtContainerClasses";
 
 constexpr char SmartPtrScope[] = "SmartPtr";
+constexpr char ContainerScope[] = "Container";
 
 constexpr int64_t DefaultQtTarget = 0x06'FF'FF; // means "lastest", for now
-constexpr char DefaultScope[] = "SmartPtr";
+constexpr char DefaultScope[] = "";
 constexpr char DefaultSmartPointerClasses[] = "all";
+constexpr char DefaultContainerClasses[] = "all";
 
 static bool all_classes(ArrayRef<StringRef> array) noexcept
 {
@@ -54,6 +57,30 @@ static std::vector<StringRef> normalizeSmartPointerClasses(std::vector<StringRef
     return std::move(classes);
 }
 
+static std::vector<StringRef> normalizeContainerClasses(std::vector<StringRef> classes)
+{
+    if (all_classes(classes)) {
+        classes = {
+            // sequential:
+            "QByteArray",
+            "QList",
+            "QQueue",
+            "QStack",
+            "QString",
+            "QVarLengthArray",
+            "QVector",
+            // associative:
+            "QHash",
+            "QMultiHash",
+            "QMap",
+            "QMultiMap",
+            "QSet",
+            // Qt has no QMultiSet
+        };
+    }
+    return std::move(classes);
+}
+
 PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, ClangTidyContext *Context)
   : utils::TransformerClangTidyCheck(Name, Context),
     QtTargetOption(Options.get(QtTargetOptionKey, DefaultQtTarget)),
@@ -61,7 +88,10 @@ PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, C
         Options.get(ScopeOptionKey, DefaultScope))),
     QtSmartPointerClassesOption(normalizeSmartPointerClasses(
         utils::options::parseStringList(
-            Options.get(QtSmartPointerClassesOptionKey, DefaultSmartPointerClasses))))
+            Options.get(QtSmartPointerClassesOptionKey, DefaultSmartPointerClasses)))),
+    QtContainerClassesOption(normalizeContainerClasses(
+        utils::options::parseStringList(
+            Options.get(QtContainerClassesOptionKey, DefaultContainerClasses))))
 {
     const std::string o = "object";
 
@@ -79,6 +109,7 @@ PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, C
     };
 
     std::vector<RewriteRuleWith<std::string>> rules;
+
     if (scope(SmartPtrScope)) {
         if (qt(5, 11)) {
             rules.push_back(renameMethod(QtSmartPointerClassesOption, 0,
@@ -94,6 +125,13 @@ PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, C
         }
     }
 
+    if (scope(ContainerScope)) {
+        rules.push_back(renameMethod(QtContainerClassesOption, 0,
+                        "count", "size"));
+        rules.push_back(renameMethod(QtContainerClassesOption, 0,
+                        "length", "size"));
+    }
+
     setRule(applyFirst(rules));
 }
 
@@ -106,6 +144,8 @@ void PortToStdCompatibleApiCheck::storeOptions(
   Options.store(Opts, QtTargetOptionKey, QtTargetOption);
   Options.store(Opts, QtSmartPointerClassesOptionKey,
                 utils::options::serializeStringList(QtSmartPointerClassesOption));
+  Options.store(Opts, QtContainerClassesOptionKey,
+                utils::options::serializeStringList(QtContainerClassesOption));
   Options.store(Opts, ScopeOptionKey,
                 utils::options::serializeStringList(ScopeOption));
 }

@@ -26,8 +26,9 @@ Options
 
 .. option:: Scope
 
-   Semicolon-separated list of scopes. The only available scope at the
-   moment is ``SmartPtr``, which is also the default.
+   Semicolon-separated list of scopes. The available scopes at the
+   moment are ``SmartPtr``, and ``Container``. If no scope is given,
+   all scopes are active.
 
 .. option:: QtSmartPointerClasses
 
@@ -35,3 +36,8 @@ Options
    default includes ``QExplicitlySharedDataPointer``, ``QPointer``,
    ``QScopedPointer``, ``QSharedDataPointer``, ``QSharedPointer``, and
    ``QWeakPointer``.
+
+.. option:: QtContainerClasses
+
+   Semicolon-separated list of names of Qt container classes. By
+   default includes all of QtCore's public container classes.

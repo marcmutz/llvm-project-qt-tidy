@@ -34,6 +34,7 @@ private:
   const int64_t QtTargetOption; // 0xMMmmPP format (MM - major, mm - minor, PP - patch)
   const std::vector<StringRef> ScopeOption;
   const std::vector<StringRef> QtSmartPointerClassesOption;
+  const std::vector<StringRef> QtContainerClassesOption;
 };
 
 } // namespace qt
