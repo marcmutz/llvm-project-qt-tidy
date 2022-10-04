@@ -61,12 +61,24 @@ static std::vector<StringRef> normalizeContainerClasses(std::vector<StringRef> c
 {
     if (all_classes(classes)) {
         classes = {
+            // views:
+            "QAnyStringView",
+            "QByteArrayView",
+            "QLatin1String",
+            "QLatin1StringView", // alias to QLatin1String, already the primary in Qt bootstrap builds
+            "QStringView",
+            "QUtf8StringView",
+            "QBasicUtf8StringView", // template underlying QUtf8StringView
             // sequential:
+            "QBitArray",
             "QByteArray",
+            "QByteArrayList",
+            "QContiguousCache",
             "QList",
             "QQueue",
             "QStack",
             "QString",
+            "QStringList",
             "QVarLengthArray",
             "QVector",
             // associative:

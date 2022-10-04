@@ -39,6 +39,11 @@ class QString {
 public:
   QChar *data();             // shouldn't be replaced
   const QChar *data() const; // ditto
+
+  int length() const; // old
+  int count() const;  // old
+  int size() const;   // new
+  int count(const QChar &); // shouldn't be replaced
 };
 
 void w1() {
@@ -137,6 +142,7 @@ void l1() {
   auto c = l.count();
   // CHECK-MESSAGES: :[[@LINE-1]]:12: warning: use 'size' instead of 'count' [qt-port-to-std-compatible-api]
   // CHECK-FIXES: {{^}}  auto c = l.size();
+  auto c2 = l.count(42);
 }
 
 void l2() {
@@ -144,4 +150,70 @@ void l2() {
   auto c = l.length();
   // CHECK-MESSAGES: :[[@LINE-1]]:12: warning: use 'size' instead of 'length' [qt-port-to-std-compatible-api]
   // CHECK-FIXES: {{^}}  auto c = l.size();
+}
+
+void l3(const QChar &ch) {
+  QString s;
+  int c = s.length();
+  // CHECK-MESSAGES: :[[@LINE-1]]:11: warning: use 'size' instead of 'length' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  int c = s.size();
+  int c2 = s.count(ch);
+}
+
+class QStringView {
+public:
+  int count() const; // old
+  int length() const; // old
+  int size() const; // new
+  int count(char ch) const; // shouldn't be touched
+};
+
+void v1() {
+  QStringView v;
+  int c = v.length();
+  // CHECK-MESSAGES: :[[@LINE-1]]:11: warning: use 'size' instead of 'length' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  int c = v.size();
+  int c2 = v.count('x');
+}
+
+template <bool B>
+class QBasicUtf8StringView {
+public:
+  int count() const; // old
+  int length() const; // old
+  int size() const; // new
+  int count(char ch) const; // shouldn't be touched
+};
+
+inline
+namespace qt_char8_t {
+  using QUtf8StringView = QBasicUtf8StringView<true>;
+}
+
+namespace qt_no_char8_t {
+  using QUtf8StringView = QBasicUtf8StringView<false>;
+}
+
+void v2() {
+  QUtf8StringView v;
+  int c = v.length();
+  // CHECK-MESSAGES: :[[@LINE-1]]:11: warning: use 'size' instead of 'length' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  int c = v.size();
+  int c2 = v.count('x');
+}
+
+void v3() {
+  qt_no_char8_t::QUtf8StringView v;
+  int c = v.length();
+  // CHECK-MESSAGES: :[[@LINE-1]]:11: warning: use 'size' instead of 'length' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  int c = v.size();
+  int c2 = v.count('x');
+}
+
+void v4() {
+  QBasicUtf8StringView<false> v;
+  int c = v.count();
+  // CHECK-MESSAGES: :[[@LINE-1]]:11: warning: use 'size' instead of 'count' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  int c = v.size();
+  int c2 = v.count('x');
 }

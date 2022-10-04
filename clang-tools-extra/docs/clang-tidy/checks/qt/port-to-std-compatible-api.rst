@@ -12,6 +12,7 @@ Currently fixes the following cases:
 - ``data()`` -> ``get()`` on ``QScopedPointer``, ``QPointer``, ``QSharedPointer``
 - ``clear()`` -> ``reset()`` on ``QPointer``, ``QSharedPointer``
 - ``toStrongRef()`` -> ``lock()`` on ``QWeakPointer``
+- ``length()`` and ``count()`` (nullary only) -> ``size()`` on Qt container classes
 
 Options
 -------
