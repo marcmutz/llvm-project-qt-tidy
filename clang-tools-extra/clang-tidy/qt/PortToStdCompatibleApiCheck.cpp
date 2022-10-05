@@ -107,17 +107,17 @@ PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, C
 {
     const std::string o = "object";
 
-    auto AnyOfQtClasses = [&](llvm::ArrayRef<llvm::StringRef> classes) {
-        return anyOf(
-            // TODO: the first one alone fails the v2() and v3() unit tests, find out why
-            expr(hasType(cxxRecordDecl(isSameOrDerivedFrom(hasAnyName(classes))))).bind(o),
-            expr(hasType(namedDecl(hasAnyName(classes)))).bind(o));
+    auto derivedFromAnyOfClasses = [&](llvm::ArrayRef<llvm::StringRef> classes) {
+        auto exprOfDeclaredType = [&](auto decl) {
+            return expr(hasType(hasUnqualifiedDesugaredType(recordType(hasDeclaration(decl))))).bind(o);
+        };
+        return exprOfDeclaredType(cxxRecordDecl(isSameOrDerivedFrom(hasAnyName(classes))));
     };
 
     auto renameMethod = [&] (llvm::ArrayRef<llvm::StringRef> classes,
                             unsigned int arity,
                             llvm::StringRef from, llvm::StringRef to) {
-        return makeRule(cxxMemberCallExpr(on(AnyOfQtClasses(classes)),
+        return makeRule(cxxMemberCallExpr(on(derivedFromAnyOfClasses(classes)),
                             callee(cxxMethodDecl(hasName(from), parameterCountIs(arity)))),
                         changeTo(cat(access(o, cat(to)), "()")),
                         cat("use '", to, "' instead of '", from, "'"));

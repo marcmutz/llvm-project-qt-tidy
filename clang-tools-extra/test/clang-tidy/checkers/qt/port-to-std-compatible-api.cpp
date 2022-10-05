@@ -170,6 +170,19 @@ void l4() {
   int c2 = l.count(42);
 }
 
+class Widget {
+public:
+  using List = QList<Widget>; // check we catch uses in nested typedefs, too
+};
+
+void l5() {
+  Widget::List l;
+  int c = l.count();
+  // CHECK-MESSAGES: :[[@LINE-1]]:11: warning: use 'size' instead of 'count' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  int c = l.size();
+  int c2 = l.count(Widget());
+};
+
 class QStringView {
 public:
   int count() const; // old
