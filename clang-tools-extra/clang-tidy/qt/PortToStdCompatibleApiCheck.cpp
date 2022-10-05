@@ -18,11 +18,22 @@
 #include "llvm/ADT/StringRef.h"
 
 using namespace ::clang::ast_matchers;
+using namespace ::clang::ast_matchers::internal;
 using namespace ::clang::transformer;
 
 namespace clang {
 namespace tidy {
 namespace qt {
+
+namespace {
+AST_MATCHER_P(CXXMemberCallExpr, onNotIgnoringParens, Matcher<Expr>,
+              InnerMatcher) {
+  const Expr *ExprNode = Node.getImplicitObjectArgument()
+                            ->IgnoreImpCasts(); // on() drops parens here, which is problematic (cf. unit test)
+  return (ExprNode != nullptr &&
+          InnerMatcher.matches(*ExprNode, Finder, Builder));
+}
+} // unnamed namespace
 
 constexpr char QtTargetOptionKey[] = "QtTarget";
 constexpr char ScopeOptionKey[] = "Scope";
@@ -119,7 +130,7 @@ PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, C
     auto renameMethod = [&] (llvm::ArrayRef<llvm::StringRef> classes,
                             unsigned int arity,
                             llvm::StringRef from, llvm::StringRef to) {
-        return makeRule(cxxMemberCallExpr(on(derivedFromAnyOfClasses(classes)),
+        return makeRule(cxxMemberCallExpr(onNotIgnoringParens(derivedFromAnyOfClasses(classes)),
                             callee(cxxMethodDecl(hasName(from), parameterCountIs(arity)))),
                         changeTo(cat(access(o, cat(to)), "()")),
                         cat("use '", to, "' instead of '", from, "'"));

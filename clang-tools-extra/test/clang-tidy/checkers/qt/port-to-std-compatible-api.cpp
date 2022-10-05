@@ -192,6 +192,12 @@ void l6() {
   int c2 = lp->count(Widget());
 }
 
+int l7(const void *p) {
+  return ((const QList<int>*)p)->length();
+  // CHECK-MESSAGES: :[[@LINE-1]]:10: warning: use 'size' instead of 'length' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  return ((const QList<int>*)p)->size();
+}
+
 class QStringView {
 public:
   int count() const; // old
