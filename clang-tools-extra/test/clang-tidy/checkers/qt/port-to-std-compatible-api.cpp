@@ -183,6 +183,15 @@ void l5() {
   int c2 = l.count(Widget());
 };
 
+void l6() {
+  Widget::List l;
+  auto lp = &l;
+  int c = lp->count();
+  // CHECK-MESSAGES: :[[@LINE-1]]:11: warning: use 'size' instead of 'count' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  int c = lp->size();
+  int c2 = lp->count(Widget());
+}
+
 class QStringView {
 public:
   int count() const; // old

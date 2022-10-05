@@ -107,9 +107,11 @@ PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, C
 {
     const std::string o = "object";
 
+    auto hasTypeIgnoringPointer = [](auto type) { return anyOf(hasType(type), hasType(pointsTo(type))); };
+
     auto derivedFromAnyOfClasses = [&](llvm::ArrayRef<llvm::StringRef> classes) {
         auto exprOfDeclaredType = [&](auto decl) {
-            return expr(hasType(hasUnqualifiedDesugaredType(recordType(hasDeclaration(decl))))).bind(o);
+            return expr(hasTypeIgnoringPointer(hasUnqualifiedDesugaredType(recordType(hasDeclaration(decl))))).bind(o);
         };
         return exprOfDeclaredType(cxxRecordDecl(isSameOrDerivedFrom(hasAnyName(classes))));
     };
