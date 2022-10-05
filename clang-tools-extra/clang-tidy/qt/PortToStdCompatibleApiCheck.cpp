@@ -122,7 +122,7 @@ PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, C
 
     auto derivedFromAnyOfClasses = [&](llvm::ArrayRef<llvm::StringRef> classes) {
         auto exprOfDeclaredType = [&](auto decl) {
-            return expr(hasTypeIgnoringPointer(hasUnqualifiedDesugaredType(recordType(hasDeclaration(decl))))).bind(o);
+            return hasTypeIgnoringPointer(hasUnqualifiedDesugaredType(recordType(hasDeclaration(decl))));
         };
         return exprOfDeclaredType(cxxRecordDecl(isSameOrDerivedFrom(hasAnyName(classes))));
     };
@@ -130,7 +130,7 @@ PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, C
     auto renameMethod = [&] (llvm::ArrayRef<llvm::StringRef> classes,
                             unsigned int arity,
                             llvm::StringRef from, llvm::StringRef to) {
-        return makeRule(cxxMemberCallExpr(onNotIgnoringParens(derivedFromAnyOfClasses(classes)),
+        return makeRule(cxxMemberCallExpr(onNotIgnoringParens(expr(derivedFromAnyOfClasses(classes)).bind(o)),
                             callee(cxxMethodDecl(hasName(from), parameterCountIs(arity)))),
                         changeTo(cat(access(o, cat(to)), "()")),
                         cat("use '", to, "' instead of '", from, "'"));
