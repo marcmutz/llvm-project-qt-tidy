@@ -108,7 +108,10 @@ PortToStdCompatibleApiCheck::PortToStdCompatibleApiCheck(llvm::StringRef Name, C
     const std::string o = "object";
 
     auto AnyOfQtClasses = [&](llvm::ArrayRef<llvm::StringRef> classes) {
-        return expr(hasType(namedDecl(hasAnyName(classes)))).bind(o);
+        return anyOf(
+            // TODO: the first one alone fails the v2() and v3() unit tests, find out why
+            expr(hasType(cxxRecordDecl(isSameOrDerivedFrom(hasAnyName(classes))))).bind(o),
+            expr(hasType(namedDecl(hasAnyName(classes)))).bind(o));
     };
 
     auto renameMethod = [&] (llvm::ArrayRef<llvm::StringRef> classes,

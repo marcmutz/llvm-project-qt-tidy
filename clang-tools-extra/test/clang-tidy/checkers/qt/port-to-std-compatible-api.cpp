@@ -160,6 +160,16 @@ void l3(const QChar &ch) {
   int c2 = s.count(ch);
 }
 
+class QIntList : public QList<int> {}; // check we catch uses in derived classes, too
+
+void l4() {
+  QIntList l;
+  int c = l.count();
+  // CHECK-MESSAGES: :[[@LINE-1]]:11: warning: use 'size' instead of 'count' [qt-port-to-std-compatible-api]
+  // CHECK-FIXES: {{^}}  int c = l.size();
+  int c2 = l.count(42);
+}
+
 class QStringView {
 public:
   int count() const; // old
