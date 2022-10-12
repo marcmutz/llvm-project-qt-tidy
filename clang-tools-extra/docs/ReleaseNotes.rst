@@ -184,8 +184,12 @@ New checks
 - New :doc:`qt-port-to-std-compatible-api
   <clang-tidy/checks/qt/port-to-std-compatible-api>` check.
 
-  Detects use of non-std-compatible API on Qt smart pointer and container classes;
-  optionally ports to the std-compatible API subset.
+  Detects use of non-std-compatible API on Qt smart pointer and container classes
+
+- New :doc:`qt-port-65-unreachable-return
+  <clang-tidy/checks/qt/port-65-unreachable-return>` check.
+
+  FIXME: add release notes.
 
 New check aliases
 ^^^^^^^^^^^^^^^^^

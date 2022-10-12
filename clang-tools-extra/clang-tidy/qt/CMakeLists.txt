@@ -6,6 +6,7 @@ set(LLVM_LINK_COMPONENTS
 add_clang_library(clangTidyQtModule
   PortToStdCompatibleApiCheck.cpp
   QtTidyModule.cpp
+  UseUnreachableReturnCheck.cpp
 
   LINK_LIBS
   clangTidy
