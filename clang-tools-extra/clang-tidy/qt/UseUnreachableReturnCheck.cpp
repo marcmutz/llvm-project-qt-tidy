@@ -61,7 +61,7 @@ UseUnreachableReturnCheck::UseUnreachableReturnCheck(llvm::StringRef Name, Clang
     setRule(
         makeRule(stmt(ignoringSwitchCases(stmt(isExpandedFromMacro("Q_UNREACHABLE")).bind(unr)),
                       nextStmt(returnStmt(optionally(hasReturnValue(expr().bind(val)))).bind(ret))),
-                 {changeTo(node(unr), makeUnreachableReturn),
+                 {changeTo(node(unr), cat(makeUnreachableReturn, ";")), // TODO: why is the ; lost w/o this?
                   changeTo(node(ret), cat(""))},
                  cat("use ", makeUnreachableReturn))
     );

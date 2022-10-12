@@ -1,6 +1,14 @@
 // RUN: %check_clang_tidy %s qt-use-unreachable-return %t
 
-#define Q_UNREACHABLE() __builtin_unreachable()
+void my_assert(const char *);
+
+#define Q_UNREACHABLE_IMPL() __builtin_unreachable()
+#define Q_UNREACHABLE()				\
+  do {						\
+    my_assert("Q_UNREACHABLE was reached");	\
+    Q_UNREACHABLE_IMPL();			\
+  } while (false)
+
 #define Q_UNREACHABLE_RETURN(...) do { Q_UNREACHABLE(); return __VA_ARGS__; } while (0)
 
 void t1() {
