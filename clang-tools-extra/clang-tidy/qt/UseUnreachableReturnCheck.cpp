@@ -38,6 +38,11 @@ AST_MATCHER_P(Stmt, nextStmt, Matcher<Stmt>, InnerMatcher) {
 
   return InnerMatcher.matches(**I, Finder, Builder);
 }
+
+AST_MATCHER_P(SwitchCase, subStmt, Matcher<Stmt>, InnerMatcher) {
+    auto *Sub = Node.getSubStmt();
+    return Sub && InnerMatcher.matches(*Sub, Finder, Builder);
+}
 } // namespace
 
 namespace tidy {
@@ -50,9 +55,12 @@ UseUnreachableReturnCheck::UseUnreachableReturnCheck(llvm::StringRef Name, Clang
     auto makeUnreachableReturn = cat("Q_UNREACHABLE_RETURN(",
                                     ifBound(val, cat(node(val)), cat("")),
                                     ")");
+    auto ignoringSwitchCases = [](auto stmt) {
+        return anyOf(stmt, switchCase(subStmt(stmt)));
+    };
     setRule(
-        makeRule(callExpr(isExpandedFromMacro("Q_UNREACHABLE"),
-                          nextStmt(returnStmt(optionally(hasReturnValue(expr().bind(val)))).bind(ret))).bind(unr),
+        makeRule(stmt(ignoringSwitchCases(stmt(isExpandedFromMacro("Q_UNREACHABLE")).bind(unr)),
+                      nextStmt(returnStmt(optionally(hasReturnValue(expr().bind(val)))).bind(ret))),
                  {changeTo(node(unr), makeUnreachableReturn),
                   changeTo(node(ret), cat(""))},
                  cat("use ", makeUnreachableReturn))
